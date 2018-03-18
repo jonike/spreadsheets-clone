@@ -1,0 +1,10 @@
+    {% for i in result.response %}
+            <form method="post"  id="loadlistdb{{ forloop.counter }}" action="/get_command_ajax/load_db/" autocomplete="off">
+            {% csrf_token %}
+                {{ i.0 }} - {{ i.1 }}
+            <input type="hidden" value="{{ i.0 }}" name="sid" id="sid" >
+            <button type="submit" onclick="updatedb('loadlistdb{{ forloop.counter }}')" >load</button>
+            <button type="submit" onclick="deletedb('loadlistdb{{ forloop.counter }}')" >delete</button>
+            </form>
+        <br>
+    {% endfor %}

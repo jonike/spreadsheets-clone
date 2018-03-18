@@ -1,0 +1,304 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Collaborative SpreadSheet</title>
+    <link rel="stylesheet" href="{% static "/css/bootstrap.min.css" %}">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static "/css/dashboard.css" %}" rel="stylesheet">
+  </head>
+
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="#">445</a>
+        <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+              {% if not uname %}
+                <li class="nav-item">
+                  <a class="nav-link" href="/login/">Login</a>
+                </li>
+              {% else %}
+                  <li class="nav-item">
+                     <a class="nav-link" href="/logout/">Logout</a>
+                  </li>
+              {% endif %}
+          </ul>
+          <form class="form-inline mt-2 mt-md-0">
+              {% if uname %}
+                <span style="color:white">Welcome {{ uname }} !</span>
+              {% endif %}
+          </form>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container-fluid">
+      <div class="row">
+        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar">
+
+          <ul class="nav nav-pills flex-column">
+              {% if uname %}
+                  <li class="nav-item">
+                    <a class="nav-link" href="/get_command/get_cells/">Show table</a>
+                  </li>
+                 <li class="nav-item">
+                    <a class="nav-link" id="showid_" href="#" data-toggle="modal" data-target="#showid" >Show id</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="uploadankara_" href="#">Upload ankara</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="/new/file_upload/">File Upload</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="evaluate_" href="#" >Evaluate table</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="listmem_" href="#" data-toggle="modal" data-target="#listmem" >List memory</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="listdb_" href="#" data-toggle="modal" data-target="#listdb">List db</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="savetodb_" href="#">Save to db</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="cleardb_" href="#">Clear db</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="setname_" href="#" data-toggle="modal" data-target="#setnamemodal">Set name</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="getcells_" href="#" data-toggle="modal" data-target="#getcellsmodal">Get range</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link"  id="setcell_" href="#" data-toggle="modal" data-target="#setcellmodal">Set cell</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="cutcell_" href="#" data-toggle="modal" data-target="#cutcellmodal">Cut cell</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="copycell_" href="#" data-toggle="modal" data-target="#copycellmodal">Copy cell</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="pastecell_" href="#" data-toggle="modal" data-target="#pastecellmodal">Paste cell</a>
+                  </li>
+              {% endif %}
+          </ul>
+        </nav>
+
+        <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
+            {% block content %}
+            {% endblock %}
+        </main>
+      </div>
+    </div>
+
+<script src="{% static "/js/jquery-3.2.1.min.js" %}"></script>
+<script src="{% static "/js/popper.min.js" %}"></script>
+<script src="{% static "/js/bootstrap.min.js" %}"></script>
+<script src="{% static "/js/bootstrap-notify.min.js" %}"></script>
+  <script>
+      function notifyme(text){
+        $.notify({
+            message: text
+        },{
+            type: 'info',
+            delay: 1000,
+            placement: {
+		        from: "bottom"
+	        }
+        }
+        );
+      }
+      function name_getter() {
+          $.get("/get_command_ajax/get_name/", function(data, status){
+              $("#sheetname").html(data);
+          });
+      }
+    name_getter();
+
+      setInterval(function(){
+      $.get("/notifycheck/", function(data, status){
+          // alert("Data: " + data + "\nStatus: " + status);
+          var json = $.parseJSON(data);
+          if(json.result && json.result == 'table') {
+            // console.log(json.extras);
+            $(".table-responsive").html(json.extras);
+            name_getter();
+            notifyme('SpreadSheet has been updated');
+          } else if(json.result && json.result == 'get_name') {
+              name_getter();
+              notifyme('SpreadSheet name has been updated');
+          }
+      });
+          }, 3000);
+
+      $( "#showid_" ).click(function() {
+          $.get("/get_command_ajax/get_id/", function(data, status){
+              $("#modal_string").html(data);
+          });
+     });
+
+      $( "#listmem_" ).click(function() {
+          $.get("/listmem/", function(data, status){
+              $("#listmemp").html(data);
+          });
+     });
+      $( "#listdb_" ).click(function() {
+          $.get("/listdb/", function(data, status){
+              $("#listdbp").html(data);
+          });
+     });
+
+      $( "#evaluate_" ).click(function() {
+          $.get("/get_command_ajax/evaluate/", function(data, status){
+              notifyme("SpreadSheet has been evaluated.");
+          });
+     });
+
+      $( "#savetodb_" ).click(function() {
+          $.get("/get_command_ajax/save/", function(data, status){
+                notifyme("SpreadSheet has been saved");
+          });
+     });
+      $( "#cleardb_" ).click(function() {
+          $.get("/get_command_ajax/cleardb/", function(data, status){
+                notifyme("Database cleared");
+          });
+     });
+
+      $( "#uploadankara_" ).click(function() {
+          $.get("/get_command_ajax/upload_ankara/", function(data, status){
+                notifyme("Ankara.csv uploaded");
+          });
+     });
+
+
+      $('#setnameform').on('submit', function(event){
+        event.preventDefault();
+          $.ajax({ // create an AJAX call...
+                data: $(this).serialize(), // get the form data
+                type: $(this).attr('method'), // GET or POST
+                url: $(this).attr('action'), // the file to call
+                success: function(response) { // on success..
+                   $("#resultset").html('The name has been changed successfully.');
+                }
+            });
+    });
+      $('#setcellform').on('submit', function(event){
+        event.preventDefault();
+          $.ajax({ // create an AJAX call...
+                data: $(this).serialize(), // get the form data
+                type: $(this).attr('method'), // GET or POST
+                url: $(this).attr('action'), // the file to call
+                success: function(response) { // on success..
+                   $("#resultset4").html('The cell has been changed successfully.');
+                }
+            });
+    });
+            $('#cutcellform').on('submit', function(event){
+        event.preventDefault();
+          $.ajax({ // create an AJAX call...
+                data: $(this).serialize(), // get the form data
+                type: $(this).attr('method'), // GET or POST
+                url: $(this).attr('action'), // the file to call
+                success: function(response) { // on success..
+                   $("#resultset5").html('The cell has been cut successfully.');
+                }
+            });
+    });
+      $('#copycellform').on('submit', function(event){
+        event.preventDefault();
+          $.ajax({ // create an AJAX call...
+                data: $(this).serialize(), // get the form data
+                type: $(this).attr('method'), // GET or POST
+                url: $(this).attr('action'), // the file to call
+                success: function(response) { // on success..
+                   $("#resultset6").html('The cell has been copied successfully.');
+                }
+            });
+    });
+      $('#getcellsrange').on('submit', function(event){
+        event.preventDefault();
+          $.ajax({ // create an AJAX call...
+                data: $(this).serialize(), // get the form data
+                type: $(this).attr('method'), // GET or POST
+                url: $(this).attr('action'), // the file to call
+                success: function(response) { // on success..
+                   $("#resultset8").html(response);
+                }
+            });
+    });
+      $('#pastecellform').on('submit', function(event){
+        event.preventDefault();
+          $.ajax({ // create an AJAX call...
+                data: $(this).serialize(), // get the form data
+                type: $(this).attr('method'), // GET or POST
+                url: $(this).attr('action'), // the file to call
+                success: function(response) { // on success..
+                   $("#resultset7").html('The cell has been pasted successfully.');
+                }
+            });
+    });
+
+function updatess(idofform) {
+    $('#'+idofform).on('submit', function(event){
+        event.preventDefault();
+          $.ajax({ // create an AJAX call...
+                data: $(this).serialize(), // get the form data
+                type: $(this).attr('method'), // GET or POST
+                url: $(this).attr('action'), // the file to call
+                success: function(response) { // on success..
+                   $("#resultset2").html('The spreadsheet has been loaded successfully.');
+                }
+            });
+    });
+}
+
+function updatedb(idofform) {
+    $('#'+idofform).on('submit', function(event){
+        event.preventDefault();
+          $.ajax({ // create an AJAX call...
+                data: $(this).serialize(), // get the form data
+                type: $(this).attr('method'), // GET or POST
+                url: $(this).attr('action'), // the file to call
+                success: function(response) { // on success..
+                   $("#resultset3").html('The spreadsheet has been loaded successfully.');
+                }
+            });
+    });
+}
+
+function deletedb(idofform) {
+    $('#'+idofform).on('submit', function(event){
+        event.preventDefault();
+          $.ajax({ // create an AJAX call...
+                data: $(this).serialize(), // get the form data
+                type: $(this).attr('method'), // GET or POST
+                url: '/get_command_ajax/delete_single_db/', // the file to call
+                success: function(response) { // on success..
+                   $("#resultset3").html('The spreadsheet has been deleted successfully.');
+                }
+            });
+          $('#'+idofform).hide();
+    });
+}
+
+  </script>
+  </body>
+</html>

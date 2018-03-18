@@ -1,0 +1,19 @@
+    <div class="table-responsive">
+            <table class="table table-striped">
+              <tbody>
+              {% for r in result.response %}
+                  <tr>
+                {% for c in r %}
+                    <td style="border:solid black 1px;">
+                    {% if c != ',' %}
+                        {{ c }}
+                    {% else %}
+
+                    {% endif %}
+                    </td>
+                {% endfor %}
+                  </tr>
+            {% endfor %}
+              </tbody>
+            </table>
+          </div>

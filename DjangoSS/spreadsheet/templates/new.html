@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+        <h2 id="sheetname"></h2>
+    {% if extra == 'file_upload' %}
+        <form method="post" enctype="multipart/form-data" action="/get_command/file_upload/" autocomplete="off">
+            {% csrf_token %}
+            <input type="file" name="myfile">
+            <input type="submit" value="upload">
+        </form>
+    {% endif %}
+
+    {% if extra == 'cut' %}
+        <form method="post" action="/get_command/cut/" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="rangecell" id="rangecell" placeholder="A1:A2" >
+            <input type="submit" value="set">
+        </form>
+    {% endif %}
+
+    {% if extra == 'paste' %}
+        <form method="post" action="/get_command/paste/" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="rangecell" id="rangecell" placeholder="A1">
+            <input type="submit" value="set">
+        </form>
+    {% endif %}
+
+    {% if extra == 'copy' %}
+        <form method="post" action="/get_command/copy/" placeholder="A1:A2" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="rangecell" id="rangecell" >
+            <input type="submit" value="set">
+        </form>
+    {% endif %}
+
+    {% if extra == 'set_name' %}
+        <form method="post" action="/get_command/set_name/" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="sname" id="sname" >
+            <input type="submit" value="set">
+        </form>
+    {% endif %}
+
+    {% if extra == 'get_cells_range' %}
+        <form method="post" action="/get_command/get_cells_range/" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="range" id="range" >
+            <input type="submit" value="get">
+        </form>
+    {% endif %}
+
+    {% if extra == 'set_cell' %}
+        <form method="post" action="/get_command/set_cell/" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="type" id="type" placeholder="formula or value">
+            <input type="text" name="cell" id="cell" placeholder="ex: A1">
+            <input type="text" name="value" id="value" placeholder="Ankara">
+            <input type="submit" value="set">
+        </form>
+    {% endif %}
+
+    {% if result.type == 'listmem' %}
+    {% for i in result.response %}
+            <form method="post" action="/get_command/load_mem/" autocomplete="off">
+            {% csrf_token %}
+                {{ i.0 }} - {{ i.1 }}
+            <input type="hidden" value="{{ i.0 }}" name="sid" id="sid" >
+            <input type="submit" value="load">
+            </form>
+        <br>
+    {% endfor %}
+    {% endif %}
+
+    {% if result.type == 'listdb' %}
+    {% for i in result.response %}
+            <form method="post" action="/get_command/load_db/" autocomplete="off">
+            {% csrf_token %}
+                {{ i.0 }} - {{ i.1 }}
+            <input type="hidden" value="{{ i.0 }}" name="sid" id="sid" >
+            <input type="submit" value="load">
+            </form>
+        <br>
+    {% endfor %}
+    {% endif %}
+
+    {% if result.type == 'string' %}
+        {{ result.response }}
+    {% endif %}
+    <br>
+    {% if result.type == 'nestedlist' %}
+    <div class="table-responsive">
+            <table class="table table-striped">
+              <tbody>
+              {% for r in result.response %}
+                  <tr>
+                {% for c in r %}
+                    <td style="border:solid black 1px;">
+                    {% if c != ',' %}
+                        {{ c }}
+                    {% else %}
+
+                    {% endif %}
+                    </td>
+                {% endfor %}
+                  </tr>
+            {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+
+    <!-- MODALS -->
+<div class="modal fade" id="showid" tabindex="-1" role="dialog" aria-labelledby="showid" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <span id="modal_string"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="setnamemodal" tabindex="-1" role="dialog" aria-labelledby="setnamemodal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+          <form method="post" action="/get_command_ajax/set_name/" id="setnameform" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="sname" id="sname" autofocusv>
+            <input type="submit" value="set">
+        </form>
+          <span id="resultset"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="listmem" tabindex="-1" role="dialog" aria-labelledby="listmem" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <p id="listmemp">
+
+        </p>
+          <span id="resultset2"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="listdb" tabindex="-1" role="dialog" aria-labelledby="listdb" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <p id="listdbp">
+
+        </p>
+          <span id="resultset3"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="modal fade" id="setcellmodal" tabindex="-1" role="dialog" aria-labelledby="setcellmodal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <form method="post" action="/get_command_ajax/set_cell/" id="setcellform" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="type" id="type" placeholder="formula or value">
+            <input type="text" name="cell" id="cell" placeholder="ex: A1">
+            <input type="text" name="value" id="value" placeholder="Ankara">
+            <input type="submit" value="set">
+        </form>
+          <span id="resultset4"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="cutcellmodal" tabindex="-1" role="dialog" aria-labelledby="cutcellmodal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-body">
+        <form method="post" id="cutcellform" action="/get_command_ajax/cut/" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="rangecell" id="rangecell" placeholder="A1:A2" >
+            <input type="submit" value="cut">
+        </form>
+          <span id="resultset5"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="modal fade" id="copycellmodal" tabindex="-1" role="dialog" aria-labelledby="copycellmodal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-body">
+        <form method="post" id="copycellform" action="/get_command_ajax/copy/" placeholder="A1:A2" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="rangecell" id="rangecell" placeholder="A1:A2">
+            <input type="submit" value="copy">
+        </form>
+          <span id="resultset6"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <div class="modal fade" id="pastecellmodal" tabindex="-1" role="dialog" aria-labelledby="pastecellmodal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-body">
+        <form method="post" id="pastecellform" action="/get_command_ajax/paste/" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="rangecell" id="rangecell" placeholder="A1">
+            <input type="submit" value="paste">
+        </form>
+          <span id="resultset7"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="modal fade" id="getcellsmodal" tabindex="-1" role="dialog" aria-labelledby="getcellsmodal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-body">
+        <form method="post" id="getcellsrange" action="/get_command_ajax/get_cells_range/" autocomplete="off">
+            {% csrf_token %}
+            <input type="text" name="range" id="range" >
+            <input type="submit" value="get">
+        </form>
+          <span id="resultset8"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- MODALS ENDS -->
+
+{% endblock %}

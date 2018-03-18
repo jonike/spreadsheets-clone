@@ -1,0 +1,9 @@
+    {% for i in result.response %}
+            <form method="post" id="loadlistmem{{ forloop.counter }}" action="/get_command_ajax/load_mem/" autocomplete="off">
+            {% csrf_token %}
+                {{ i.0 }} - {{ i.1 }}
+            <input type="hidden" value="{{ i.0 }}" name="sid" id="sid" >
+                <button type="submit" onclick="updatess('loadlistmem{{ forloop.counter }}')" >load</button>
+            </form>
+        <br>
+    {% endfor %}
